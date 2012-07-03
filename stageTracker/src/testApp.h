@@ -4,33 +4,42 @@
 #include "ofxCv.h"
 #include "ofxQTKitVideoGrabber.h"    
 #include "ofxPTZControl.h"
+#include "ofxUI.h"
 
 class testApp : public ofBaseApp {
 public:
 	void setup();
 	void update();
 	void draw();
-	void keyPressed(int key);
+    void exit();
     
-    void mouseReleased(int x, int y, int button);
-	
-	float threshold;
-	
-    //ofVideoGrabber vidGrabber;
-    ofxQTKitVideoGrabber vidGrabber; // does not support allocate
+    void keyPressed(int key);
+    void mouseReleased(int x, int y, int button);    
+	void keyReleased(int key);
+	void mouseMoved(int x, int y );
+	void mouseDragged(int x, int y, int button);
+	void mousePressed(int x, int y, int button);
+	void windowResized(int w, int h);
+	void dragEvent(ofDragInfo dragInfo);
+	void gotMessage(ofMessage msg);
     
-    ofxQTKitVideoGrabber vidGrabber2;
+    void setGUI1();
+    ofxUICanvas *gui1;
+	
+    bool hideGUI;
+    
+    int minAreaRadius, maxAreaRadius, threshold;
+    
+    ofxQTKitVideoGrabber vidGrabber; // does not support allocate    
+    //ofxQTKitVideoGrabber vidGrabber2;
     
     ofxPTZControl ptzC;
     
-    //cv::Mat imgMat;
-    //ofImage img;
-    
 	ofxCv::ContourFinder contourFinder;
 	bool showLabels;
-    
     int mode;
-    
     int followID;
+    
+    void guiEvent(ofxUIEventArgs &e);
 
 };

@@ -11,7 +11,6 @@
 
 ofxPTZControl::ofxPTZControl(){
     // consider loading settings from xml
-    
     ip = "192.168.0.10";
     port = 80;
 }
@@ -65,9 +64,13 @@ string ofxPTZControl::sendCommand(string command){
     // todo: add 120ms timer to not overflow with movement commands
     
     string cmd = "http://" + ip + ":" + ofToString(port) + "/cgi-bin/aw_ptz?cmd=%23" + command + "&res=1";
-    cout<<"Sending command: " + cmd<<endl;
-    response = ofLoadURL(cmd);
-    cout<<"Response: "<<response.data<<endl;
-    return response.data;
+
+        cout<<"Sending command: " + cmd<<endl;
+        response = ofLoadURL(cmd);        
+        cout<<"Response: "<<response.data<<endl;
+        return response.data;
+        
+
+    // check for connection error
 }
 
