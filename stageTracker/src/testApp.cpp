@@ -6,13 +6,12 @@ using namespace cv;
 void testApp::setup() {
     
     ofEnableSmoothing(); 
-	ofSetVerticalSync(true);
-	ofBackground(0);
-    
+	ofBackground(0);    
     
     setGUI1();
     gui1->setDrawBack(false);
     
+    // set defaults
     
     vidGrabber.listDevices();
     vidGrabber.setDeviceID(0); //11
@@ -26,8 +25,14 @@ void testApp::setup() {
 	// an object can move up to x pixels per frame
 	contourFinder.getTracker().setMaximumDistance(400);
 	
+    //contourFinder.setInvert(true); // find black instead of white
+	trackingColorMode = TRACK_COLOR_RGB;
+    
 	showLabels = true;
     mode = 0;
+    
+    
+
     
     
     
@@ -45,9 +50,13 @@ void testApp::update() {
 }
 
 void testApp::draw() {
+    
+    ofPushStyle(); 
+	ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    
 	ofSetBackgroundAuto(showLabels);
 	RectTracker& tracker = contourFinder.getTracker();
-	
+    
 	if(showLabels) {
 		ofSetColor(200);
 		vidGrabber.draw(0, 0);
@@ -115,6 +124,9 @@ void testApp::keyPressed(int key) {
 void testApp::mouseReleased(int x, int y, int button) {
     //get contour at position x y
     
+    targetColor = vidGrabber.getPixelsRef().getColor(x, y);
+	contourFinder.setTargetColor(targetColor, trackingColorMode);
+    
     for(int i = 0; i < contourFinder.size(); i++) {
         ofPoint center = toOf(contourFinder.getCenter(i));        
         if(ofDist(center.x, center.y, x, y) < 30) {
@@ -127,6 +139,8 @@ void testApp::mouseReleased(int x, int y, int button) {
         }
         
     }
+    
+    
     
 }
 
@@ -142,7 +156,38 @@ void testApp::guiEvent(ofxUIEventArgs &e)
 {
     string name = e.widget->getName(); 
 	int kind = e.widget->getKind(); 
-	cout << "got event from: " << name << endl; 
+	cout << "got event from: " << name << endl;
+    
+    
+    if(name == "Area radius range")
+	{
+		ofxUIRangeSlider *rslider = (ofxUIRangeSlider *) e.widget;
+        
+        minAreaRadius = rslider->getScaledValueLow(); 
+        maxAreaRadius = rslider->getScaledValueHigh();  
+        
+        contourFinder.setMinAreaRadius(minAreaRadius);
+        contourFinder.setMaxAreaRadius(maxAreaRadius);
+	}
+    else if(name == "Threshold")
+	{
+		ofxUISlider *slider = (ofxUISlider *) e.widget; 
+		threshold = slider->getScaledValue();
+        contourFinder.setThreshold(threshold);
+	}
+    // tracker
+    else if(name == "Persistence")
+	{
+		ofxUISlider *slider = (ofxUISlider *) e.widget; 
+		persistence = slider->getScaledValue();
+        contourFinder.getTracker().setPersistence(persistence);
+	}
+    else if(name == "Persistence")
+	{
+		ofxUISlider *slider = (ofxUISlider *) e.widget; 
+		persistence = slider->getScaledValue();
+        contourFinder.getTracker().setPersistence(persistence);
+	}
 }
 
 //--------------------------------------------------------------
@@ -191,30 +236,23 @@ void testApp::setGUI1()
 	
     float dim = 16; 
 	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING; 
-    float length = 255-xInit; 
+    float length = 255-xInit;
     
 	gui1 = new ofxUICanvas(0, 0, length+xInit, ofGetHeight()); 
-	gui1->addWidgetDown(new ofxUILabel("PANEL 1: BASICS", OFX_UI_FONT_LARGE)); 
-    gui1->addWidgetDown(new ofxUILabel("Press 'h' to Hide GUIs", OFX_UI_FONT_LARGE)); 
     
-    gui1->addWidgetDown(new ofxUISpacer(length-xInit, 2)); 
-	gui1->addWidgetDown(new ofxUILabel("H SLIDERS", OFX_UI_FONT_MEDIUM)); 
-	//gui1->addWidgetDown(new ofxUISlider(length-xInit,dim, 0.0, 255.0, red, "RED")); 
-	//gui1->addWidgetDown(new ofxUISlider(length-xInit,dim, 0.0, 255.0, green, "GREEN")); 
-	//gui1->addWidgetDown(new ofxUISlider(length-xInit,dim, 0.0, 255.0, blue, "BLUE")); 	
+	gui1->addWidgetDown(new ofxUILabel("Contour finder", OFX_UI_FONT_MEDIUM)); 
+    gui1->addWidgetDown(new ofxUISpacer(length-xInit, 2));
+        
+    gui1->addWidgetDown(new ofxUIRangeSlider(length-xInit,dim, 0.0, 300.0, minAreaRadius, maxAreaRadius, "Area radius range")); 	
+     
+	gui1->addWidgetDown(new ofxUISlider(length-xInit,dim, 0, 255, threshold, "Threshold"));    
     
-    gui1->addWidgetDown(new ofxUISpacer(length-xInit, 2)); 
-    gui1->addWidgetDown(new ofxUILabel("V SLIDERS", OFX_UI_FONT_MEDIUM)); 
-	gui1->addWidgetDown(new ofxUISlider(dim,160, 0.0, 255.0, 150, "0")); 	
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "1")); 
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "2")); 
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "3")); 
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "4")); 
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "5")); 
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "6")); 
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "7")); 
-	gui1->addWidgetRight(new ofxUISlider(dim,160, 0.0, 255.0, 150, "8")); 
+    gui1->addWidgetDown(new ofxUILabel("Contour tracker", OFX_UI_FONT_MEDIUM));
+    gui1->addWidgetDown(new ofxUISpacer(length-xInit, 2));
+	gui1->addWidgetDown(new ofxUISlider(length-xInit,dim, 0, 255, persistence, "Persistence"));
+    gui1->addWidgetDown(new ofxUISlider(length-xInit,dim, 0, 255, distance, "Distance"));
     
+    gui1->loadSettings("GUI/guiSettings.xml");
 
 	ofAddListener(gui1->newGUIEvent,this,&testApp::guiEvent);
 }

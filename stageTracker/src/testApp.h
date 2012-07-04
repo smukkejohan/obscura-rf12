@@ -28,7 +28,7 @@ public:
 	
     bool hideGUI;
     
-    int minAreaRadius, maxAreaRadius, threshold;
+    float minAreaRadius, maxAreaRadius, threshold, persistence, distance;
     
     ofxQTKitVideoGrabber vidGrabber; // does not support allocate    
     //ofxQTKitVideoGrabber vidGrabber2;
@@ -36,6 +36,9 @@ public:
     ofxPTZControl ptzC;
     
 	ofxCv::ContourFinder contourFinder;
+    ofxCv::TrackingColorMode trackingColorMode;
+	ofColor targetColor;
+    
 	bool showLabels;
     int mode;
     int followID;
