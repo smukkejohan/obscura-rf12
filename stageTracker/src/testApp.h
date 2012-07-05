@@ -28,7 +28,8 @@ public:
 	
     bool hideGUI;
     
-    float minAreaRadius, maxAreaRadius, threshold, persistence, distance;
+    float minAreaRadius, maxAreaRadius, threshold, distance;
+    int persistence;
     
     ofxQTKitVideoGrabber vidGrabber; // does not support allocate    
     //ofxQTKitVideoGrabber vidGrabber2;
@@ -38,11 +39,14 @@ public:
 	ofxCv::ContourFinder contourFinder;
     ofxCv::TrackingColorMode trackingColorMode;
 	ofColor targetColor;
+    bool invert;
     
 	bool showLabels;
     int mode;
     int followID;
     
     void guiEvent(ofxUIEventArgs &e);
+    
+    int width, height;
 
 };
